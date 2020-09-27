@@ -60,7 +60,28 @@ class ItemsController extends Controller
      */
     public function create(Request $request)
     {
-        //
+        try {
+            $validated = $request->validate([
+                'name'          => ['required', 'string'],
+                'description'   => ['required', 'string'],
+                'price'         => ['required', 'integer'],
+                'status'        => ['required', 'string'],
+            ]);
+
+            Item::create($validated);
+            return response(json_encode([
+                'message' => 'Item Created',
+                'status' => 201
+            ]), 201);
+
+        } catch(\Exception $e) {
+            return response(json_encode([
+                'data' => [],
+                'message' => $e->getMessage(),
+                'status' => 500
+            ]), 500);
+        }
+
     }
 
     /**
@@ -72,7 +93,32 @@ class ItemsController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        try {
+            $validated = $request->validate([
+                'name'          => ['required', 'string'],
+                'description'   => ['required', 'string'],
+                'price'         => ['required', 'integer'],
+                'status'        => ['required', 'string'],
+            ]);
+
+            $item = Item::findOrFail($id);
+
+            $item->fill($validated);
+
+            $item->save();
+
+            return response(json_encode([
+                'message' => 'Item Updated',
+                'status' => 201
+            ]), 201);
+
+        } catch(\Exception $e) {
+            return response(json_encode([
+                'data' => [],
+                'message' => $e->getMessage(),
+                'status' => 500
+            ]), 500);
+        }
     }
 
     /**
@@ -83,6 +129,21 @@ class ItemsController extends Controller
      */
     public function destroy($id)
     {
-        //
+        try {
+            
+            Item::findOrFail($id)->destroy();
+
+            return response(json_encode([
+                'message' => 'Item Deleted',
+                'status' => 201
+            ]), 201);
+
+        } catch(\Exception $e) {
+            return response(json_encode([
+                'data' => [],
+                'message' => $e->getMessage(),
+                'status' => 500
+            ]), 500);
+        }
     }
 }
