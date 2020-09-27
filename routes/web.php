@@ -17,6 +17,4 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::prefix('items')->group(function() {
-    Route::get('/show', 'ItemsController@show');
-});
+

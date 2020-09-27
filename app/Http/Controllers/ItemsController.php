@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Item;
+use Illuminate\Http\Response;
+
 class ItemsController extends Controller
 {
     /**
@@ -14,36 +16,40 @@ class ItemsController extends Controller
      */
     public function show(Request $request)
     {
-        $req = $request->all();
+        try {
+            $req = $request->all();
 
-        $perPage = isset($req['per_page']) ? (int)$req['per_page'] : 10;
-        $queryString = isset($req['query_string']) ? $req['query_string'] : '';
-        $categorySearch = isset($req['category_search']) ? (int)$req['category_search'] : 0;
-
-        $items = Item::query();
-
-        $items->when($categorySearch, function($query) use ($queryString) {
-            $query->whereHas('category', function($q) use ($queryString) {
-                $q->where('name', 'LIKE', '%' . $queryString . '%')
-                    ->orWhere('description', 'LIKE', '%' . $queryString . '%');
+            $queryString = isset($req['query_string']) ? $req['query_string'] : '';
+            $categorySearch = isset($req['category_search']) ? (int)$req['category_search'] : 0;
+    
+            $items = Item::query();
+    
+            $items->when($categorySearch, function($query) use ($queryString) {
+                $query->whereHas('categories', function($q) use ($queryString) {
+                    $q->where('name', 'LIKE', '%' . $queryString . '%')
+                        ->orWhere('description', 'LIKE', '%' . $queryString . '%');
+                });
             });
-        });
+    
+            $items->when(!$categorySearch, function($query) use ($queryString) {
+                $query->where('name', 'LIKE', '%' . $queryString . '%')
+                ->orWhere('description', 'LIKE', '%' . $queryString . '%');
+            });
+    
+            $res = $items->get();
+    
+            return response(json_encode([
+                'data' => $res,
+                'status' => 201
+            ]), 201);
+        } catch(\Exception $e) {
+            return response(json_encode([
+                'data' => [],
+                'message' => $e->getMessage(),
+                'status' => 500
+            ]), 500);
+        }
 
-        $items->when(!$categorySearch, function($query) use ($queryString) {
-            $query->where('name', 'LIKE', '%' . $queryString . '%')
-            ->orWhere('description', 'LIKE', '%' . $queryString . '%');
-        });
-
-
-        $items->paginate($perPage);
-
-        $users->appends([
-            'per_page'      => $perPage,
-            'query_string'  => $queryString,
-            'category_search'  => $categorySearch,
-        ]);
-
-        dd($items->get());
     }
 
     /**
