@@ -3,13 +3,14 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">{{item.name}}</h5>
+                    <h5 class="modal-title" v-if="!isAdd">{{item.name}}</h5>
+                    <h5 class="modal-title" v-else>Add new Item</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <div class="custom-control custom-switch float-right">
+                    <div class="custom-control custom-switch float-right" v-if="!isAdd">
                         <input type="checkbox" class="custom-control-input" id="editSwitch" v-model="isEdit" @change="isEditChanged">
                         <label class="custom-control-label no-select" for="editSwitch">Edit Item</label>
                     </div>
@@ -24,24 +25,29 @@
 import { EventBus } from "../event-bus";
 import itemView from './ItemView.vue'
 import itemEdit from './ItemEdit.vue'
+import itemAdd from './ItemAdd.vue'
 export default {
     components: {
-        itemView
+        itemView,
+        itemEdit,
+        itemAdd
     },
     data() {
         return {
             item: {},
             components: {
                 itemView,
-                itemEdit
+                itemEdit,
+                itemAdd,
             },
             isEdit: false,
+            isAdd: false,
             activeComponent: null
         }
     },
     methods: {
         isEditChanged() {
-            this.activeComponent = this.isEdit ? this.components['itemEdit'] : this.components['itemView'];
+            this.activeComponent = this.isAdd ?  this.components['itemAdd'] : this.isEdit ? this.components['itemEdit'] : this.components['itemView'];
         }
     },
     mounted() {
@@ -49,6 +55,7 @@ export default {
             $('#itemModal').modal('show');
             this.item = data.item;
             this.isEdit = data.isEdit;
+            this.isAdd = data.isAdd || false;
             this.isEditChanged();
         });
     }

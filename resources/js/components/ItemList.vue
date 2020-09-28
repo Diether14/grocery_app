@@ -12,7 +12,10 @@
       </button>
     </div>
     <div class="row">
-      <h3 class="col-6">Grocery Items</h3>
+      <h3 class="col-6">
+          <span>Grocery Items</span>
+          <button class="btn btn-sm btn-success d-inline" @click="addNew()">Add new</button>
+      </h3>
       <div class="col-6">
         <div class="form-group d-inline">
           <label>Search by:</label>
@@ -135,7 +138,14 @@ export default {
     openModal(method = "view", item) {
       EventBus.$emit("showItemModal", {
         item,
+        method,
         isEdit: method === "edit",
+      });
+    },
+    addNew() {
+      EventBus.$emit("showItemModal", {
+        isAdd: true,
+        isEdit: false,
       });
     },
     openDeleteModal(item) {
@@ -150,10 +160,12 @@ export default {
   },
     mounted() {
       EventBus.$on("showAlert", (data) => {
-        this.showItems();
         this.alertMessage = data.message;
         this.showAlert();
         this.alertClass.push(data.class);
+      });
+      EventBus.$on("refresh", (data) => {
+          this.showItems();
       });
     },
 };

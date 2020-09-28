@@ -24,3 +24,7 @@ Route::prefix('items')->group(function() {
     Route::post('/update/{id}', 'ItemsController@update');
     Route::post('/destroy/{id}', 'ItemsController@destroy');
 });
+
+Route::prefix('categories')->group(function() {
+    Route::get('/options', 'CategoryController@getOptionCollection');
+});

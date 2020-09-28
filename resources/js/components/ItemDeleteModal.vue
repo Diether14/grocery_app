@@ -39,12 +39,13 @@ export default {
                 EventBus.$emit("showAlert", {
                     class: 'alert-success',
                     message: this.item.name + ' deleted successfuly.'
-                })
+                });
+                EventBus.$emit("refresh");
             }).catch(err => {
                 EventBus.$emit("showAlert", {
                     class: 'alert-danger',
                     message: 'Error deleting Item please try again later.'                    
-                })
+                });
             }).finally(() => {
                 $('#deleteItemModal').modal('hide');
             });
