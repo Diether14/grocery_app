@@ -152,8 +152,7 @@ class ItemsController extends Controller
     {
         try {
 
-            Item::findOrFail($id)->destroy();
-
+            Item::destroy($id);
             return response(json_encode([
                 'message' => 'Item Deleted',
                 'status' => 201

@@ -10,6 +10,8 @@
 <body>
     <div id="app" class="py-4 container">
         @yield('content')
+        <item-modal></item-modal>
+        <item-delete-modal></item-delete-modal>
     </div>
     <script src="{{ asset('js/app.js') }}"></script>
 </body>

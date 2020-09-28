@@ -5,6 +5,7 @@
  */
 
 require('./bootstrap');
+import vSelect from 'vue-select'
 
 window.Vue = require('vue');
 
@@ -21,6 +22,9 @@ window.Vue = require('vue');
 
 Vue.component('example-component', require('./components/ExampleComponent.vue').default);
 Vue.component('item-list', require('./components/ItemList.vue').default);
+Vue.component('item-modal', require('./components/ItemModal.vue').default);
+Vue.component('item-delete-modal', require('./components/ItemDeleteModal.vue').default);
+Vue.component('v-select', vSelect)
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to
