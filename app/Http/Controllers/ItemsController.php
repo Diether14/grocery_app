@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Item;
+use App\Models\Category;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 
 class ItemsController extends Controller
 {
@@ -36,7 +38,7 @@ class ItemsController extends Controller
                 ->orWhere('description', 'LIKE', '%' . $queryString . '%');
             });
     
-            $res = $items->get();
+            $res = $items->with('categories')->get();
     
             return response(json_encode([
                 'data' => $res,
@@ -60,26 +62,40 @@ class ItemsController extends Controller
      */
     public function create(Request $request)
     {
+        DB::beginTransaction();
         try {
             $validated = $request->validate([
                 'name'          => ['required', 'string'],
                 'description'   => ['required', 'string'],
                 'price'         => ['required', 'integer'],
                 'status'        => ['required', 'string'],
+                'categories'    => ['required', 'array'],
+                'categories.*'  => ['required', 'integer',]
             ]);
 
-            Item::create($validated);
+            $item = Item::create($validated);
+
+            $categories = Category::findOrFail($validated['categories']);
+
+            $item->categories()->saveMany($categories);
+            
+            DB::commit();
+
             return response(json_encode([
                 'message' => 'Item Created',
                 'status' => 201
             ]), 201);
 
         } catch(\Exception $e) {
+
+            DB::rollback();
+
             return response(json_encode([
                 'data' => [],
                 'message' => $e->getMessage(),
                 'status' => 500
             ]), 500);
+
         }
 
     }
@@ -93,26 +109,31 @@ class ItemsController extends Controller
      */
     public function update(Request $request, $id)
     {
+        DB::beginTransaction();
+
         try {
             $validated = $request->validate([
                 'name'          => ['required', 'string'],
                 'description'   => ['required', 'string'],
                 'price'         => ['required', 'integer'],
                 'status'        => ['required', 'string'],
+                'categories'    => ['required', 'array'],
+                'categories.*'  => ['required', 'integer',]
             ]);
 
             $item = Item::findOrFail($id);
-
             $item->fill($validated);
-
             $item->save();
+            $item->categories()->sync($validated['categories']);
 
+            DB::commit();
             return response(json_encode([
                 'message' => 'Item Updated',
                 'status' => 201
             ]), 201);
 
         } catch(\Exception $e) {
+            DB::rollback();
             return response(json_encode([
                 'data' => [],
                 'message' => $e->getMessage(),
@@ -130,7 +151,7 @@ class ItemsController extends Controller
     public function destroy($id)
     {
         try {
-            
+
             Item::findOrFail($id)->destroy();
 
             return response(json_encode([
@@ -146,4 +167,5 @@ class ItemsController extends Controller
             ]), 500);
         }
     }
+
 }
